@@ -399,7 +399,7 @@
       return { left, top, width, height, centerX: left + width / 2, centerY: top + height / 2 };
     }
 
-    function drawComposition(targetContext, showActiveOutline = false) {
+    function drawComposition(targetContext) {
       targetContext.clearRect(0, 0, canvas.width, canvas.height);
       targetContext.drawImage(photo, 0, 0);
       for (const key of ["logo", "phone"]) {
@@ -410,14 +410,6 @@
         targetContext.globalAlpha = Number(opacityInput.value) / 100;
         targetContext.drawImage(layer.image, bounds.left, bounds.top, bounds.width, bounds.height);
         targetContext.restore();
-        if (showActiveOutline && activeLayer === key) {
-          targetContext.save();
-          targetContext.strokeStyle = "#6658e8";
-          targetContext.lineWidth = Math.max(2, canvas.width * 0.003);
-          targetContext.setLineDash([Math.max(5, canvas.width * 0.008), Math.max(3, canvas.width * 0.004)]);
-          targetContext.strokeRect(bounds.left, bounds.top, bounds.width, bounds.height);
-          targetContext.restore();
-        }
       }
     }
 
@@ -429,7 +421,7 @@
       if (!photo) return;
       canvas.width = photo.naturalWidth;
       canvas.height = photo.naturalHeight;
-      drawComposition(context, true);
+      drawComposition(context);
       canvas.classList.toggle("has-overlays", Boolean(layers.logo.image || layers.phone.image));
       canvas.style.display = "block";
       emptyState.style.display = "none";
