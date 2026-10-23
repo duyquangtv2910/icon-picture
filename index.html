@@ -109,7 +109,9 @@
     .canvas-wrap {
       position: relative;
       display: grid;
-      height: clamp(420px, calc(100vh - 280px), 820px);
+      grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+      height: clamp(500px, calc(100vh - 200px), 900px);
+      min-height: 0;
       overflow: hidden;
       place-items: center;
       border: 1px solid #e9ecf3;
@@ -118,8 +120,10 @@
     }
     #previewCanvas {
       display: none;
+      width: auto;
+      height: auto;
       max-width: calc(100% - 24px);
-      max-height: min(760px, max(320px, calc(100vh - 340px)));
+      max-height: calc(100% - 24px);
       object-fit: contain;
       touch-action: none;
       cursor: default;
@@ -244,8 +248,8 @@
       .heading { margin-bottom: 22px; }
       .heading p { font-size: 13px; }
       .preview-card { padding: 12px; border-radius: 16px; }
-      .canvas-wrap { height: clamp(320px, calc(100vh - 410px), 600px); }
-      #previewCanvas { max-height: min(560px, max(240px, calc(100vh - 430px))); }
+      .canvas-wrap { height: clamp(420px, calc(100vh - 300px), 700px); }
+      #previewCanvas { max-height: calc(100% - 32px); }
       .control-card { display: block; padding: 16px; border-radius: 16px; }
       .control-section:nth-of-type(2) { border-top: 1px solid var(--line); }
       .control-section:last-of-type { border-top: 1px solid var(--line); }
