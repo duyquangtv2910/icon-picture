@@ -109,14 +109,21 @@
     .canvas-wrap {
       position: relative;
       display: grid;
-      min-height: 390px;
+      height: clamp(420px, calc(100vh - 280px), 820px);
       overflow: hidden;
       place-items: center;
       border: 1px solid #e9ecf3;
       border-radius: 13px;
       background: #fff;
     }
-    #previewCanvas { display: none; max-width: 100%; max-height: min(64vh, 650px); object-fit: contain; touch-action: none; cursor: default; }
+    #previewCanvas {
+      display: none;
+      max-width: calc(100% - 24px);
+      max-height: min(760px, max(320px, calc(100vh - 340px)));
+      object-fit: contain;
+      touch-action: none;
+      cursor: default;
+    }
     #previewCanvas.has-overlays { cursor: grab; }
     #previewCanvas.is-dragging { cursor: grabbing; }
     .empty-state { max-width: 300px; padding: 24px; text-align: center; }
@@ -237,8 +244,8 @@
       .heading { margin-bottom: 22px; }
       .heading p { font-size: 13px; }
       .preview-card { padding: 12px; border-radius: 16px; }
-      .canvas-wrap { min-height: 280px; }
-      #previewCanvas { max-height: 52vh; }
+      .canvas-wrap { height: clamp(320px, calc(100vh - 410px), 600px); }
+      #previewCanvas { max-height: min(560px, max(240px, calc(100vh - 430px))); }
       .control-card { display: block; padding: 16px; border-radius: 16px; }
       .control-section:nth-of-type(2) { border-top: 1px solid var(--line); }
       .control-section:last-of-type { border-top: 1px solid var(--line); }
