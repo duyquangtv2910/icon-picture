@@ -464,7 +464,9 @@
     function updateResizeHandle() {
       const layer = layers[activeLayer];
       const bounds = getLayerBounds(layer);
-      if (!photo || !bounds || !window.matchMedia("(pointer: fine)").matches) {
+      const isDesktopLayout = window.matchMedia("(min-width: 821px)").matches;
+      const hasPrecisePointer = window.matchMedia("(any-pointer: fine)").matches;
+      if (!photo || !bounds || (!isDesktopLayout && !hasPrecisePointer)) {
         resizeHandle.hidden = true;
         return;
       }
