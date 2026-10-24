@@ -55,6 +55,30 @@
       object-fit: contain;
     }
     .top-note { color: var(--muted); font-size: 13px; }
+    .back-to-top {
+      position: fixed;
+      z-index: 10;
+      right: 20px;
+      bottom: 20px;
+      display: grid;
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      place-items: center;
+      color: #fff;
+      border: 0;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 4px 14px rgba(30, 41, 68, .22);
+      opacity: 1;
+      transition: background .15s ease, transform .15s ease;
+    }
+    .back-to-top:hover { background: var(--accent-dark); transform: translateY(-2px); }
+    .back-to-top[hidden] { display: none; }
+    .back-to-top svg { width: 22px; height: 22px; }
+    @media (max-width: 560px) {
+      .back-to-top { right: 14px; bottom: 14px; width: 44px; height: 44px; }
+    }
 
     main { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 50px 0 64px; }
     .heading { margin: 0 auto 30px; text-align: center; }
@@ -503,7 +527,7 @@
           </div>
         </section>
 
-        <section class="control-section">
+        <section id="opacitySection" class="control-section">
           <div class="field-heading">
             <label class="field-label" for="opacityInput">Độ mờ</label>
             <output id="opacityValue" class="field-value" for="opacityInput">100%</output>
@@ -526,6 +550,10 @@
     </div>
   </main>
 
+  <button id="backToTopButton" class="back-to-top" type="button" aria-label="Quay nhanh lên đầu trang" title="Lên đầu trang" hidden>
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5m0 0-6 6m6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+
   <script>
     const imageInput = document.getElementById("imageInput");
     const canvas = document.getElementById("previewCanvas");
@@ -540,6 +568,8 @@
     const noteInput = document.getElementById("noteInput");
     const noteStatus = document.getElementById("noteStatus");
     const clearNoteButton = document.getElementById("clearNoteButton");
+    const opacitySection = document.getElementById("opacitySection");
+    const backToTopButton = document.getElementById("backToTopButton");
     const errorMessage = document.getElementById("errorMessage");
 
     let photo = null;
@@ -567,6 +597,10 @@
 
     function setError(message = "") {
       errorMessage.textContent = message;
+    }
+
+    function updateBackToTopButton() {
+      backToTopButton.hidden = opacitySection.getBoundingClientRect().top > window.innerHeight;
     }
 
     function createSharpenedPhoto() {
@@ -1218,6 +1252,16 @@
     });
 
     window.addEventListener("resize", updateResizeHandle);
+    window.addEventListener("scroll", updateBackToTopButton, { passive: true });
+    window.addEventListener("resize", updateBackToTopButton);
+    backToTopButton.addEventListener("click", () => {
+      backToTopButton.hidden = true;
+      window.scrollTo({
+        top: 0,
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+      });
+    });
+    updateBackToTopButton();
   </script>
 </body>
 </html>
