@@ -67,7 +67,7 @@
       align-items: center;
       gap: 7px;
       margin-bottom: 13px;
-      color: var(--accent-dark);
+      color: #fff;
       font-size: 12px;
       font-weight: 750;
       letter-spacing: .1em;
@@ -138,7 +138,7 @@
       height: 24px;
       padding: 0;
       place-items: center;
-      color: var(--accent-dark);
+      color: #fff;
       border: 0;
       border-radius: 50%;
       background: transparent;
@@ -146,7 +146,7 @@
       cursor: nesw-resize;
       touch-action: none;
     }
-    .resize-handle svg { width: 16px; height: 16px; filter: drop-shadow(0 1px 1px #fff); }
+    .resize-handle svg { width: 16px; height: 16px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .8)); }
     .resize-handle[hidden] { display: none; }
     .empty-state { max-width: 300px; padding: 24px; text-align: center; }
     .empty-icon {
@@ -474,7 +474,7 @@
       const containerBounds = dropZone.getBoundingClientRect();
       resizeHandle.hidden = false;
       resizeHandle.setAttribute("aria-label", `Kéo để thay đổi kích thước ${activeLayer === "logo" ? "Logo" : "Phone"}`);
-      resizeHandle.style.left = `${canvasBounds.left - containerBounds.left - dropZone.clientLeft + (bounds.left + bounds.width) * canvasBounds.width / canvas.width}px`;
+      resizeHandle.style.left = `${canvasBounds.left - containerBounds.left - dropZone.clientLeft + (bounds.left + bounds.width) * canvasBounds.width / canvas.width - 6}px`;
       resizeHandle.style.top = `${canvasBounds.top - containerBounds.top - dropZone.clientTop + bounds.top * canvasBounds.height / canvas.height}px`;
     }
 
