@@ -386,7 +386,7 @@
     </section>
 
     <div class="workspace">
-      <section class="preview-card" aria-label="Khu vực xem trước ảnh">
+      <section id="previewSection" class="preview-card" aria-label="Khu vực xem trước ảnh">
         <div class="preview-head">
           <h2 class="section-title">Xem trước</h2>
           <div class="preview-actions">
@@ -550,7 +550,7 @@
     </div>
   </main>
 
-  <button id="backToTopButton" class="back-to-top" type="button" aria-label="Quay nhanh lên đầu trang" title="Lên đầu trang" hidden>
+  <button id="backToTopButton" class="back-to-top" type="button" aria-label="Quay lại phần xem trước" title="Quay lại phần xem trước" hidden>
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 19V5m0 0-6 6m6-6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
 
@@ -569,6 +569,7 @@
     const noteStatus = document.getElementById("noteStatus");
     const clearNoteButton = document.getElementById("clearNoteButton");
     const opacitySection = document.getElementById("opacitySection");
+    const previewSection = document.getElementById("previewSection");
     const backToTopButton = document.getElementById("backToTopButton");
     const errorMessage = document.getElementById("errorMessage");
 
@@ -1256,8 +1257,7 @@
     window.addEventListener("resize", updateBackToTopButton);
     backToTopButton.addEventListener("click", () => {
       backToTopButton.hidden = true;
-      window.scrollTo({
-        top: 0,
+      previewSection.scrollIntoView({
         behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
       });
     });
