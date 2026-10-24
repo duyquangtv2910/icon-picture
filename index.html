@@ -730,7 +730,7 @@
         return;
       }
       note.image = createNoteImage(text);
-      note.widthRatio = Math.min(0.8, note.image.width / photo.naturalWidth);
+      note.widthRatio = note.image.width / photo.naturalWidth;
       if (!note.centerX || !note.centerY) {
         note.centerX = photo.naturalWidth / 2;
         note.centerY = photo.naturalHeight / 2;
@@ -743,11 +743,17 @@
       if (!layer.image || !photo) return null;
       const { width: imageWidth, height: imageHeight } = getLayerDimensions(layer);
       const aspectRatio = imageWidth / imageHeight;
-      const maxWidth = Math.min(canvas.width * 0.8, canvas.height * 0.8 * aspectRatio);
+      const maxWidth = layer === layers.note
+        ? Infinity
+        : Math.min(canvas.width * 0.8, canvas.height * 0.8 * aspectRatio);
       const width = Math.min(canvas.width * layer.widthRatio, maxWidth);
       const height = width / aspectRatio;
-      const left = Math.max(0, Math.min(canvas.width - width, layer.centerX - width / 2));
-      const top = Math.max(0, Math.min(canvas.height - height, layer.centerY - height / 2));
+      const left = layer === layers.note
+        ? layer.centerX - width / 2
+        : Math.max(0, Math.min(canvas.width - width, layer.centerX - width / 2));
+      const top = layer === layers.note
+        ? layer.centerY - height / 2
+        : Math.max(0, Math.min(canvas.height - height, layer.centerY - height / 2));
       return { left, top, width, height, centerX: left + width / 2, centerY: top + height / 2 };
     }
 
@@ -852,6 +858,12 @@
       return { x: (first.x + second.x) / 2, y: (first.y + second.y) / 2 };
     }
 
+    function getMaxLayerRatio(layer, aspectRatio) {
+      return layer === layers.note
+        ? Infinity
+        : Math.min(0.8, canvas.height * 0.8 * aspectRatio / canvas.width);
+    }
+
     function rebaseGesture() {
       if (!gesture) return;
       const points = [...gesture.points.values()];
@@ -903,7 +915,7 @@
       const bounds = getLayerBounds(layer);
       const { width, height } = getLayerDimensions(layer);
       const aspectRatio = width / height;
-      const maxRatio = Math.min(0.8, canvas.height * 0.8 * aspectRatio / canvas.width);
+      const maxRatio = getMaxLayerRatio(layer, aspectRatio);
       const minRatio = Math.min(0.05, maxRatio);
       const zoom = Math.exp(-event.deltaY * 0.001);
       layer.widthRatio = Math.max(minRatio, Math.min(maxRatio, layer.widthRatio * zoom));
@@ -937,7 +949,7 @@
       const point = pointerToImagePoint(event);
       const { width, height } = getLayerDimensions(layer);
       const aspectRatio = width / height;
-      const maxRatio = Math.min(0.8, canvas.height * 0.8 * aspectRatio / canvas.width);
+      const maxRatio = getMaxLayerRatio(layer, aspectRatio);
       const minRatio = Math.min(0.05, maxRatio);
       const distance = distanceBetween(point, { x: resizeGesture.centerX, y: resizeGesture.centerY });
       layer.widthRatio = Math.max(minRatio, Math.min(maxRatio, resizeGesture.baseWidth * distance / resizeGesture.baseDistance / canvas.width));
@@ -971,7 +983,7 @@
         layer.centerY = gesture.baseCenterY + midpoint.y - gesture.baseMidpoint.y;
         const { width, height } = getLayerDimensions(layer);
         const aspectRatio = width / height;
-        const maxRatio = Math.min(0.8, canvas.height * 0.8 * aspectRatio / canvas.width);
+        const maxRatio = getMaxLayerRatio(layer, aspectRatio);
         layer.widthRatio = Math.max(Math.min(0.05, maxRatio), Math.min(maxRatio, gesture.baseWidth * distance / gesture.baseDistance / canvas.width));
       }
       const adjustedBounds = getLayerBounds(layer);
