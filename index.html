@@ -216,15 +216,6 @@
       object-fit: contain;
     }
     .logo-option span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    #phoneLogoGallery .phone-number {
-      display: block;
-      margin-top: 3px;
-      color: var(--ink);
-      font-size: 9px;
-      font-weight: 650;
-      letter-spacing: -.02em;
-      white-space: nowrap;
-    }
     .logo-option:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .upload-row { display: flex; align-items: center; gap: 10px; }
     .upload-row .secondary-button { flex: 1; font-size: 12px; }
@@ -521,19 +512,13 @@
       logo: { image: null, centerX: 0, centerY: 0, widthRatio: 0.18 },
       phone: { image: null, centerX: 0, centerY: 0, widthRatio: 0.22 }
     };
-    const phoneNumbers = ["210-236-5041", "210-408-1699", "210-255-8411"];
-
     document.querySelectorAll("#phoneLogoGallery .logo-option").forEach((button, index) => {
       const label = button.dataset.name || button.querySelector("span").textContent;
-      const phoneNumber = phoneNumbers[index];
-      if (!phoneNumber) throw new Error(`Thiếu số điện thoại cho ${label}.`);
-      const numberLabel = document.createElement("span");
-      numberLabel.className = "phone-number";
-      numberLabel.textContent = phoneNumber;
-      button.append(numberLabel);
-      button.dataset.phoneNumber = phoneNumber;
-      button.dataset.logoLabel = `${label} · ${phoneNumber}`;
-      button.setAttribute("aria-label", `Chọn ${label}, số điện thoại ${phoneNumber}`);
+      const phoneImage = button.dataset.src;
+      if (!phoneImage) throw new Error(`Thiếu hình ảnh cho ${label}.`);
+      button.querySelector("img").src = phoneImage;
+      button.dataset.logoLabel = label;
+      button.setAttribute("aria-label", `Chọn ${label}`);
     });
 
     function setError(message = "") {
