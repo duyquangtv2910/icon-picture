@@ -556,13 +556,16 @@
     function drawPhoto(targetContext) {
       if (activeTone === "sharp") {
         sharpenedPhoto ??= createSharpenedPhoto();
+        targetContext.save();
+        targetContext.filter = "contrast(1.12) saturate(1.08)";
         targetContext.drawImage(sharpenedPhoto, 0, 0);
+        targetContext.restore();
         return;
       }
       const filters = {
-        fresh: "saturate(1.16) brightness(1.04)",
-        bright: "brightness(1.16)",
-        vivid: "saturate(1.45)"
+        fresh: "sepia(0.24) saturate(1.3) brightness(1.04)",
+        bright: "brightness(1.2) contrast(1.04)",
+        vivid: "saturate(1.7) contrast(1.12)"
       };
       targetContext.save();
       targetContext.filter = filters[activeTone] || "none";
