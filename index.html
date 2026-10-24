@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#fff1f5">
-  <title>Icon Picture — Gắn logo vào ảnh</title>
+  <title>Logo nail on picture — Gắn logo vào ảnh</title>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap");
 
@@ -46,18 +46,14 @@
       backdrop-filter: blur(14px);
     }
 
-    .brand { display: flex; align-items: center; gap: 11px; font-weight: 760; letter-spacing: -.035em; }
+    .brand { display: flex; align-items: center; gap: 11px; color: #efa7c8; font-size: 14px; font-weight: 760; letter-spacing: -.035em; }
     .brand-mark {
-      display: grid;
+      display: block;
       width: 36px;
       height: 36px;
-      place-items: center;
-      color: white;
-      border-radius: 12px;
-      background: linear-gradient(145deg, #8879ff, #5749d7);
-      box-shadow: 0 5px 12px rgba(102, 88, 232, .24);
+      border-radius: 8px;
+      object-fit: contain;
     }
-    .brand-mark svg { width: 20px; height: 20px; }
     .top-note { color: var(--muted); font-size: 13px; }
 
     main { width: min(1180px, calc(100% - 40px)); margin: 0 auto; padding: 50px 0 64px; }
@@ -333,10 +329,8 @@
 <body>
   <header class="topbar">
     <div class="brand">
-      <span class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5v-9Z" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="9" r="1.5" fill="currentColor"/><path d="m5 16 4.4-4.4a1 1 0 0 1 1.4 0l2 2 1.4-1.4a1 1 0 0 1 1.4 0L20 16.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </span>
-      <span>Icon Picture</span>
+      <img class="brand-mark" src="logos/logo-V-09.png" alt="">
+      <span>Logo nail on picture</span>
     </div>
     <span class="top-note">Ghép logo vào ảnh dễ dàng</span>
   </header>
