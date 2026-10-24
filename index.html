@@ -702,11 +702,12 @@
       noteContext.lineWidth = Math.max(1, fontSize * 0.025);
       noteContext.strokeStyle = "#fff";
       noteContext.fillStyle = headingStyle.color;
+      noteContext.textAlign = "center";
       noteContext.textBaseline = "alphabetic";
       lines.forEach((line, index) => {
         const baseline = padding + ascent + lineHeight * index;
-        noteContext.strokeText(line, padding, baseline);
-        noteContext.fillText(line, padding, baseline);
+        noteContext.strokeText(line, noteCanvas.width / 2, baseline);
+        noteContext.fillText(line, noteCanvas.width / 2, baseline);
       });
       const rotation = -Math.PI / 12;
       const rotatedWidth = Math.ceil(noteCanvas.width * Math.cos(Math.abs(rotation)) + noteCanvas.height * Math.sin(Math.abs(rotation)));
