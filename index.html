@@ -260,7 +260,8 @@
     }
     .tone-button:hover { border-color: #c8c1ff; }
     .tone-button[aria-pressed="true"] { color: #fff; border-color: var(--accent); background: var(--accent); }
-    .tone-button svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+    .tone-button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .tone-button svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; pointer-events: none; }
     .mobile-tone-toolbar { display: none; }
     .mobile-tone-toolbar[hidden] { display: none; }
     .download-button { width: 100%; min-height: 46px; color: #fff; background: linear-gradient(110deg, #7162ed, #594bd7); box-shadow: 0 7px 15px rgba(102, 88, 232, .22); }
