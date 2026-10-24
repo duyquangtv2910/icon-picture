@@ -229,7 +229,6 @@
     }
     input[type="file"] { display: none; }
     input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
-    .position-grid { display: grid; width: max-content; grid-template-columns: repeat(2, 44px); gap: 8px; margin: 0 auto; }
     .position-button {
       display: grid;
       width: 44px;
@@ -243,9 +242,8 @@
     .position-button:hover { border-color: #c8c1ff; }
     .position-button[aria-pressed="true"] { color: #fff; border-color: var(--accent); background: var(--accent); }
     .position-button svg { width: 23px; height: 23px; fill: currentColor; }
-    .hint { margin: 9px 0 0; color: var(--muted); font-size: 11px; text-align: center; }
-    .position-tone-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-    .position-tone-grid > .control-section { min-width: 0; padding: 0; border-top: 0; }
+    .tone-control-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+    .tone-control-grid > .control-section { min-width: 0; padding: 0; border-top: 0; }
     .tone-grid { display: grid; width: max-content; grid-template-columns: repeat(2, 44px); gap: 8px; margin: 0 auto; }
     .tone-button {
       display: grid;
@@ -279,7 +277,7 @@
       .control-card { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 22px; }
       .control-card h2, .control-card > .privacy-note, .control-card > .error-message { grid-column: 1 / -1; }
       .control-card h2 { margin-bottom: 13px; }
-      .position-tone-grid { grid-column: 1 / -1; }
+      .tone-control-grid { grid-column: 1 / -1; }
       .control-section:nth-of-type(2) { border-top: 0; }
       .control-section:last-of-type { grid-column: 1 / -1; }
     }
@@ -424,18 +422,7 @@
           </div>
         </section>
 
-        <div class="position-tone-grid">
-          <section class="control-section">
-            <div class="field-heading">
-              <span id="positionLabel" class="field-label">Vị trí Logo</span>
-            </div>
-            <div class="position-grid" role="group" aria-label="Chọn vị trí logo">
-              <button class="position-button" type="button" data-position="top-left" aria-label="Góc trên bên trái" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="7" cy="7" r="2.5"/></svg></button>
-              <button class="position-button" type="button" data-position="top-right" aria-label="Góc trên bên phải" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="7" r="2.5"/></svg></button>
-              <button class="position-button" type="button" data-position="bottom-left" aria-label="Góc dưới bên trái" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="7" cy="17" r="2.5"/></svg></button>
-              <button class="position-button" type="button" data-position="bottom-right" aria-label="Góc dưới bên phải" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="17" r="2.5"/></svg></button>
-            </div>
-          </section>
+        <div class="tone-control-grid">
           <section class="control-section tone-control-section">
             <div class="field-heading">
               <span class="field-label">Chọn tông màu</span>
@@ -660,10 +647,6 @@
       }
     }
 
-    function updateActiveLayerControls() {
-      document.getElementById("positionLabel").textContent = "Vị trí Logo";
-    }
-
     function updateClearButton(layerKey) {
       const buttonId = layerKey === "logo" ? "clearLogoButton" : "clearPhoneButton";
       document.getElementById(buttonId).disabled = !layers[layerKey].image;
@@ -767,7 +750,6 @@
         if (!layerKey && !pinchOnly) return;
         if (layerKey) activeLayer = layerKey;
         document.querySelectorAll(".position-button").forEach((button) => button.setAttribute("aria-pressed", "false"));
-        updateActiveLayerControls();
         gesture = { layerKey: layerKey || activeLayer, pinchOnly, points: new Map() };
         rebaseGesture();
       } else if (gesture.points.size >= 2) {
@@ -797,7 +779,6 @@
       layer.centerX = bounds.centerX;
       layer.centerY = bounds.centerY;
       document.querySelectorAll(".position-button").forEach((button) => button.setAttribute("aria-pressed", "false"));
-      updateActiveLayerControls();
       render();
     }, { passive: false });
 
@@ -933,7 +914,6 @@
           button.parentElement.querySelectorAll(".logo-option").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
           document.getElementById("logoStatus").textContent = button.dataset.logoLabel || button.querySelector("span").textContent;
           updateClearButton(layerKey);
-          updateActiveLayerControls();
           setError("");
           render();
         };
@@ -941,7 +921,6 @@
           if (loadId !== logoLoadIds[layerKey]) return;
           setError(`Không tải được ${button.dataset.src}. Hãy tải thư mục logos lên repository cùng với index.html.`);
         };
-        updateActiveLayerControls();
         image.src = button.dataset.src;
       });
     });
@@ -962,7 +941,6 @@
         const bounds = getLayerBounds(layer);
         if (!photo || !bounds) return;
         activeLayer = "logo";
-        updateActiveLayerControls();
         const margin = Math.max(8, Math.round(Math.min(canvas.width, canvas.height) * 0.025));
         const isLeft = button.dataset.position.endsWith("left");
         const isTop = button.dataset.position.startsWith("top");
