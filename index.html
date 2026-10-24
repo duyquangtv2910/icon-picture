@@ -130,6 +130,24 @@
     }
     #previewCanvas.has-overlays { cursor: grab; }
     #previewCanvas.is-dragging { cursor: grabbing; }
+    .resize-handle {
+      position: absolute;
+      z-index: 2;
+      display: grid;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      place-items: center;
+      color: #fff;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 2px 8px rgba(23, 32, 51, .28);
+      cursor: nesw-resize;
+      touch-action: none;
+    }
+    .resize-handle svg { width: 17px; height: 17px; }
+    .resize-handle[hidden] { display: none; }
     .empty-state { max-width: 300px; padding: 24px; text-align: center; }
     .empty-icon {
       display: grid;
@@ -289,6 +307,11 @@
         </div>
         <div id="dropZone" class="canvas-wrap">
           <canvas id="previewCanvas" aria-label="Ảnh xem trước sau khi gắn logo"></canvas>
+          <button id="resizeHandle" class="resize-handle" type="button" aria-label="Kéo để thay đổi kích thước logo" hidden>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M14 5h5v5M19 5l-7 7M10 19H5v-5M5 19l7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
           <input id="imageInput" type="file" accept="image/*">
           <div id="emptyState" class="empty-state">
             <div class="empty-icon" aria-hidden="true">
@@ -380,6 +403,8 @@
     const imageInput = document.getElementById("imageInput");
     const canvas = document.getElementById("previewCanvas");
     const context = canvas.getContext("2d");
+    const resizeHandle = document.getElementById("resizeHandle");
+    const dropZone = document.getElementById("dropZone");
     const emptyState = document.getElementById("emptyState");
     const changeImageButton = document.getElementById("changeImageButton");
     const downloadButton = document.getElementById("downloadButton");
@@ -389,6 +414,7 @@
     let photo = null;
     let activeLayer = "logo";
     let gesture = null;
+    let resizeGesture = null;
     const logoLoadIds = { logo: 0, phone: 0 };
     const layers = {
       logo: { image: null, centerX: 0, centerY: 0, widthRatio: 0.18 },
@@ -435,6 +461,21 @@
       document.getElementById(buttonId).disabled = !layers[layerKey].image;
     }
 
+    function updateResizeHandle() {
+      const layer = layers[activeLayer];
+      const bounds = getLayerBounds(layer);
+      if (!photo || !bounds || !window.matchMedia("(pointer: fine)").matches) {
+        resizeHandle.hidden = true;
+        return;
+      }
+      const canvasBounds = canvas.getBoundingClientRect();
+      const containerBounds = dropZone.getBoundingClientRect();
+      resizeHandle.hidden = false;
+      resizeHandle.setAttribute("aria-label", `Kéo để thay đổi kích thước ${activeLayer === "logo" ? "Logo" : "Phone"}`);
+      resizeHandle.style.left = `${canvasBounds.left - containerBounds.left - dropZone.clientLeft + (bounds.left + bounds.width) * canvasBounds.width / canvas.width}px`;
+      resizeHandle.style.top = `${canvasBounds.top - containerBounds.top - dropZone.clientTop + bounds.top * canvasBounds.height / canvas.height}px`;
+    }
+
     function clearLayer(layerKey) {
       logoLoadIds[layerKey]++;
       layers[layerKey].image = null;
@@ -458,6 +499,7 @@
       canvas.style.display = "block";
       emptyState.style.display = "none";
       downloadButton.disabled = false;
+      updateResizeHandle();
     }
 
     function pointerToImagePoint(event) {
@@ -506,7 +548,7 @@
     }
 
     canvas.addEventListener("pointerdown", (event) => {
-      if (!photo) return;
+      if (!photo || resizeGesture) return;
       const point = pointerToImagePoint(event);
       if (!gesture) {
         const layerKey = findLayerAt(point);
@@ -529,7 +571,7 @@
     });
 
     canvas.addEventListener("wheel", (event) => {
-      if (!photo || gesture) return;
+      if (!photo || gesture || resizeGesture) return;
       const layerKey = findLayerAt(pointerToImagePoint(event));
       if (!layerKey) return;
       event.preventDefault();
@@ -547,6 +589,47 @@
       updateActiveLayerControls();
       render();
     }, { passive: false });
+
+    resizeHandle.addEventListener("pointerdown", (event) => {
+      const layer = layers[activeLayer];
+      const bounds = getLayerBounds(layer);
+      if (!bounds || gesture) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const point = pointerToImagePoint(event);
+      resizeGesture = {
+        pointerId: event.pointerId,
+        layerKey: activeLayer,
+        centerX: layer.centerX,
+        centerY: layer.centerY,
+        baseWidth: bounds.width,
+        baseDistance: Math.max(1, distanceBetween(point, { x: bounds.centerX, y: bounds.centerY }))
+      };
+      resizeHandle.setPointerCapture(event.pointerId);
+    });
+
+    resizeHandle.addEventListener("pointermove", (event) => {
+      if (!resizeGesture || resizeGesture.pointerId !== event.pointerId) return;
+      const layer = layers[resizeGesture.layerKey];
+      const point = pointerToImagePoint(event);
+      const aspectRatio = layer.image.naturalWidth / layer.image.naturalHeight;
+      const maxRatio = Math.min(0.8, canvas.height * 0.8 * aspectRatio / canvas.width);
+      const minRatio = Math.min(0.05, maxRatio);
+      const distance = distanceBetween(point, { x: resizeGesture.centerX, y: resizeGesture.centerY });
+      layer.widthRatio = Math.max(minRatio, Math.min(maxRatio, resizeGesture.baseWidth * distance / resizeGesture.baseDistance / canvas.width));
+      render();
+      event.preventDefault();
+    });
+
+    function endResizeGesture(event) {
+      if (!resizeGesture || resizeGesture.pointerId !== event.pointerId) return;
+      resizeGesture = null;
+      render();
+    }
+
+    resizeHandle.addEventListener("pointerup", endResizeGesture);
+    resizeHandle.addEventListener("pointercancel", endResizeGesture);
+    resizeHandle.addEventListener("lostpointercapture", endResizeGesture);
 
     canvas.addEventListener("pointermove", (event) => {
       if (!gesture || !gesture.points.has(event.pointerId)) return;
@@ -677,7 +760,6 @@
       });
     });
 
-    const dropZone = document.getElementById("dropZone");
     dropZone.addEventListener("dragover", (event) => {
       event.preventDefault();
       dropZone.style.outline = "2px solid #8b7dff";
@@ -719,6 +801,8 @@
         setError("");
       }, "image/png");
     });
+
+    window.addEventListener("resize", updateResizeHandle);
   </script>
 </body>
 </html>
