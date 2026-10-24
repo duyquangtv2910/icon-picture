@@ -189,6 +189,18 @@
     .phone-logo-group { margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--line); }
     .phone-logo-title { margin: 0 0 8px; font-size: 11px; font-weight: 720; }
     .phone-logo-title span { margin-left: 5px; color: var(--muted); font-size: 10px; font-weight: 450; }
+    .note-control-section .field-heading { gap: 10px; }
+    .note-input {
+      width: 100%;
+      min-height: 40px;
+      padding: 9px 11px;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fff;
+      font-size: 13px;
+    }
+    .note-input:focus { border-color: var(--accent); outline: 2px solid rgba(102, 88, 232, .14); }
     .logo-option {
       position: relative;
       min-width: 0;
@@ -278,6 +290,7 @@
       .tone-control-grid { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .control-section:nth-of-type(2) { border-top: 0; }
       .control-section:last-of-type { grid-column: 1 / -1; }
+      .note-control-section { grid-column: 1 / -1; }
     }
     @media (max-width: 560px) {
       .topbar { height: 84px; padding: 0 18px; }
@@ -454,6 +467,18 @@
           </div>
         </section>
 
+        <section class="control-section note-control-section">
+          <div class="field-heading">
+            <h3 class="phone-logo-title">Thêm ghi chú: chị Hai ghi thêm chữ vào hình</h3>
+            <div class="layer-heading-actions">
+              <span id="noteStatus" class="field-value">Chưa có ghi chú</span>
+              <button id="clearNoteButton" class="clear-layer-button" type="button" aria-label="Bỏ chọn ghi chú" disabled>Bỏ chọn</button>
+            </div>
+          </div>
+          <label class="visually-hidden" for="noteInput">Dòng chữ muốn thêm vào hình</label>
+          <input id="noteInput" class="note-input" type="text" maxlength="80" placeholder="Nhập dòng chữ muốn thêm vào hình">
+        </section>
+
         <section class="control-section">
           <div class="field-heading">
             <label class="field-label" for="opacityInput">Độ mờ</label>
@@ -488,6 +513,9 @@
     const changeImageButton = document.getElementById("changeImageButton");
     const downloadButton = document.getElementById("downloadButton");
     const opacityInput = document.getElementById("opacityInput");
+    const noteInput = document.getElementById("noteInput");
+    const noteStatus = document.getElementById("noteStatus");
+    const clearNoteButton = document.getElementById("clearNoteButton");
     const errorMessage = document.getElementById("errorMessage");
 
     let photo = null;
@@ -497,10 +525,11 @@
     let processedTone = null;
     let gesture = null;
     let resizeGesture = null;
-    const logoLoadIds = { logo: 0, phone: 0 };
+    const logoLoadIds = { logo: 0, phone: 0, note: 0 };
     const layers = {
       logo: { image: null, centerX: 0, centerY: 0, widthRatio: 0.18 },
-      phone: { image: null, centerX: 0, centerY: 0, widthRatio: 0.22 }
+      phone: { image: null, centerX: 0, centerY: 0, widthRatio: 0.22 },
+      note: { image: null, centerX: 0, centerY: 0, widthRatio: 0 }
     };
     document.querySelectorAll("#phoneLogoGallery .logo-option").forEach((button, index) => {
       const label = button.dataset.name || button.querySelector("span").textContent;
@@ -632,10 +661,73 @@
       targetContext.drawImage(processedPhoto, 0, 0);
     }
 
+    function getLayerDimensions(layer) {
+      if (!layer.image) return null;
+      return {
+        width: layer.image.naturalWidth || layer.image.width,
+        height: layer.image.naturalHeight || layer.image.height
+      };
+    }
+
+    function createNoteImage(text) {
+      const heading = document.getElementById("page-title");
+      const headingStyle = getComputedStyle(heading);
+      let fontSize = Math.min(photo.naturalWidth * 0.09, photo.naturalHeight * 0.08);
+      const measurementCanvas = document.createElement("canvas");
+      const measurementContext = measurementCanvas.getContext("2d");
+      const font = () => `${headingStyle.fontWeight} ${fontSize}px ${headingStyle.fontFamily}`;
+      measurementContext.font = font();
+      const maxTextWidth = photo.naturalWidth * 0.76;
+      const measuredText = measurementContext.measureText(text);
+      if (measuredText.width > maxTextWidth) {
+        fontSize *= maxTextWidth / measuredText.width;
+      }
+      measurementContext.font = font();
+      const metrics = measurementContext.measureText(text);
+      const ascent = metrics.actualBoundingBoxAscent || fontSize * 0.8;
+      const descent = metrics.actualBoundingBoxDescent || fontSize * 0.2;
+      const padding = fontSize * 0.12;
+      const noteCanvas = document.createElement("canvas");
+      noteCanvas.width = Math.ceil(metrics.width + padding * 2);
+      noteCanvas.height = Math.ceil(ascent + descent + padding * 2);
+      const noteContext = noteCanvas.getContext("2d");
+      noteContext.font = font();
+      noteContext.fillStyle = headingStyle.color;
+      noteContext.textBaseline = "alphabetic";
+      noteContext.fillText(text, padding, padding + ascent);
+      return noteCanvas;
+    }
+
+    function updateNoteLayer() {
+      const text = noteInput.value.trim();
+      const note = layers.note;
+      note.image = null;
+      if (!text) {
+        noteStatus.textContent = "Chưa có ghi chú";
+        clearNoteButton.disabled = true;
+        render();
+        return;
+      }
+      activeLayer = "note";
+      clearNoteButton.disabled = false;
+      if (!photo) {
+        noteStatus.textContent = "Chọn ảnh trước";
+        render();
+        return;
+      }
+      note.image = createNoteImage(text);
+      note.widthRatio = Math.min(0.8, note.image.width / photo.naturalWidth);
+      if (!note.centerX || !note.centerY) {
+        note.centerX = photo.naturalWidth / 2;
+        note.centerY = photo.naturalHeight / 2;
+      }
+      noteStatus.textContent = "Đang hiển thị";
+      render();
+    }
+
     function getLayerBounds(layer) {
       if (!layer.image || !photo) return null;
-      const imageWidth = layer.image.naturalWidth || layer.image.width;
-      const imageHeight = layer.image.naturalHeight || layer.image.height;
+      const { width: imageWidth, height: imageHeight } = getLayerDimensions(layer);
       const aspectRatio = imageWidth / imageHeight;
       const maxWidth = Math.min(canvas.width * 0.8, canvas.height * 0.8 * aspectRatio);
       const width = Math.min(canvas.width * layer.widthRatio, maxWidth);
@@ -648,7 +740,7 @@
     function drawComposition(targetContext) {
       targetContext.clearRect(0, 0, canvas.width, canvas.height);
       drawPhoto(targetContext);
-      for (const key of ["logo", "phone"]) {
+      for (const key of ["logo", "phone", "note"]) {
         const layer = layers[key];
         const bounds = getLayerBounds(layer);
         if (!bounds) continue;
@@ -660,6 +752,10 @@
     }
 
     function updateClearButton(layerKey) {
+      if (layerKey === "note") {
+        clearNoteButton.disabled = !layers.note.image;
+        return;
+      }
       const buttonId = layerKey === "logo" ? "clearLogoButton" : "clearPhoneButton";
       document.getElementById(buttonId).disabled = !layers[layerKey].image;
     }
@@ -676,7 +772,8 @@
       const canvasBounds = canvas.getBoundingClientRect();
       const containerBounds = dropZone.getBoundingClientRect();
       resizeHandle.hidden = false;
-      resizeHandle.setAttribute("aria-label", `Kéo để thay đổi kích thước ${activeLayer === "logo" ? "Logo" : "Phone"}`);
+      const layerNames = { logo: "Logo", phone: "Phone", note: "ghi chú" };
+      resizeHandle.setAttribute("aria-label", `Kéo để thay đổi kích thước ${layerNames[activeLayer]}`);
       resizeHandle.style.left = `${canvasBounds.left - containerBounds.left - dropZone.clientLeft + (bounds.left + bounds.width) * canvasBounds.width / canvas.width - 6}px`;
       resizeHandle.style.top = `${canvasBounds.top - containerBounds.top - dropZone.clientTop + bounds.top * canvasBounds.height / canvas.height}px`;
     }
@@ -684,13 +781,20 @@
     function clearLayer(layerKey) {
       logoLoadIds[layerKey]++;
       layers[layerKey].image = null;
-      document.querySelectorAll(layerKey === "logo" ? "#logoGallery .logo-option" : "#phoneLogoGallery .logo-option")
-        .forEach((button) => button.setAttribute("aria-pressed", "false"));
+      if (layerKey === "note") {
+        noteInput.value = "";
+        noteStatus.textContent = "Chưa có ghi chú";
+      } else {
+        document.querySelectorAll(layerKey === "logo" ? "#logoGallery .logo-option" : "#phoneLogoGallery .logo-option")
+          .forEach((button) => button.setAttribute("aria-pressed", "false"));
+      }
       if (layerKey === "logo") {
         document.querySelectorAll(".position-button").forEach((button) => button.setAttribute("aria-pressed", "false"));
       }
       activeLayer = layerKey;
-      document.getElementById("logoStatus").textContent = layerKey === "logo" ? "Đã bỏ chọn Logo" : "Đã bỏ chọn Phone";
+      if (layerKey !== "note") {
+        document.getElementById("logoStatus").textContent = layerKey === "logo" ? "Đã bỏ chọn Logo" : "Đã bỏ chọn Phone";
+      }
       updateClearButton(layerKey);
       render();
     }
@@ -700,7 +804,7 @@
       canvas.width = photo.naturalWidth;
       canvas.height = photo.naturalHeight;
       drawComposition(context);
-      canvas.classList.toggle("has-overlays", Boolean(layers.logo.image || layers.phone.image));
+      canvas.classList.toggle("has-overlays", Boolean(layers.logo.image || layers.phone.image || layers.note.image));
       canvas.style.display = "block";
       emptyState.style.display = "none";
       downloadButton.disabled = false;
@@ -717,7 +821,7 @@
     }
 
     function findLayerAt(point) {
-      for (const key of ["phone", "logo"]) {
+      for (const key of ["note", "phone", "logo"]) {
         const bounds = getLayerBounds(layers[key]);
         if (bounds && point.x >= bounds.left && point.x <= bounds.left + bounds.width && point.y >= bounds.top && point.y <= bounds.top + bounds.height) {
           return key;
@@ -783,7 +887,8 @@
       activeLayer = layerKey;
       const layer = layers[layerKey];
       const bounds = getLayerBounds(layer);
-      const aspectRatio = layer.image.naturalWidth / layer.image.naturalHeight;
+      const { width, height } = getLayerDimensions(layer);
+      const aspectRatio = width / height;
       const maxRatio = Math.min(0.8, canvas.height * 0.8 * aspectRatio / canvas.width);
       const minRatio = Math.min(0.05, maxRatio);
       const zoom = Math.exp(-event.deltaY * 0.001);
@@ -816,7 +921,8 @@
       if (!resizeGesture || resizeGesture.pointerId !== event.pointerId) return;
       const layer = layers[resizeGesture.layerKey];
       const point = pointerToImagePoint(event);
-      const aspectRatio = layer.image.naturalWidth / layer.image.naturalHeight;
+      const { width, height } = getLayerDimensions(layer);
+      const aspectRatio = width / height;
       const maxRatio = Math.min(0.8, canvas.height * 0.8 * aspectRatio / canvas.width);
       const minRatio = Math.min(0.05, maxRatio);
       const distance = distanceBetween(point, { x: resizeGesture.centerX, y: resizeGesture.centerY });
@@ -849,7 +955,8 @@
         const distance = distanceBetween(points[0], points[1]);
         layer.centerX = gesture.baseCenterX + midpoint.x - gesture.baseMidpoint.x;
         layer.centerY = gesture.baseCenterY + midpoint.y - gesture.baseMidpoint.y;
-        const aspectRatio = layer.image.naturalWidth / layer.image.naturalHeight;
+        const { width, height } = getLayerDimensions(layer);
+        const aspectRatio = width / height;
         const maxRatio = Math.min(0.8, canvas.height * 0.8 * aspectRatio / canvas.width);
         layer.widthRatio = Math.max(Math.min(0.05, maxRatio), Math.min(maxRatio, gesture.baseWidth * distance / gesture.baseDistance / canvas.width));
       }
@@ -906,6 +1013,9 @@
         layers.logo.centerY = image.naturalHeight * 0.76;
         layers.phone.centerX = image.naturalWidth * 0.76;
         layers.phone.centerY = image.naturalHeight * 0.76;
+        layers.note.centerX = image.naturalWidth / 2;
+        layers.note.centerY = image.naturalHeight / 2;
+        if (noteInput.value.trim()) updateNoteLayer();
         document.getElementById("previewStatus").textContent = "Đã sẵn sàng";
         document.getElementById("imageDimensions").textContent = `${image.naturalWidth} × ${image.naturalHeight} px`;
         changeImageButton.hidden = false;
@@ -946,6 +1056,8 @@
     changeImageButton.addEventListener("click", () => imageInput.click());
     document.getElementById("clearLogoButton").addEventListener("click", () => clearLayer("logo"));
     document.getElementById("clearPhoneButton").addEventListener("click", () => clearLayer("phone"));
+    document.getElementById("clearNoteButton").addEventListener("click", () => clearLayer("note"));
+    noteInput.addEventListener("input", updateNoteLayer);
     document.querySelector('.logo-option[aria-pressed="true"]').click();
     opacityInput.addEventListener("input", () => {
       document.getElementById("opacityValue").textContent = `${opacityInput.value}%`;
@@ -999,6 +1111,9 @@
         layers.logo.centerY = image.naturalHeight * 0.76;
         layers.phone.centerX = image.naturalWidth * 0.76;
         layers.phone.centerY = image.naturalHeight * 0.76;
+        layers.note.centerX = image.naturalWidth / 2;
+        layers.note.centerY = image.naturalHeight / 2;
+        if (noteInput.value.trim()) updateNoteLayer();
         document.getElementById("previewStatus").textContent = "Đã sẵn sàng";
         document.getElementById("imageDimensions").textContent = `${image.naturalWidth} × ${image.naturalHeight} px`;
         changeImageButton.hidden = false;
