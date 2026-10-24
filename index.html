@@ -244,6 +244,23 @@
     .position-button[aria-pressed="true"] { color: #fff; border-color: var(--accent); background: var(--accent); }
     .position-button svg { width: 23px; height: 23px; fill: currentColor; }
     .hint { margin: 9px 0 0; color: var(--muted); font-size: 11px; text-align: center; }
+    .position-tone-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .position-tone-grid > .control-section { min-width: 0; padding: 0; border-top: 0; }
+    .tone-grid { display: grid; width: max-content; grid-template-columns: repeat(2, 44px); gap: 8px; margin: 0 auto; }
+    .tone-button {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      place-items: center;
+      color: #778196;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .tone-button:hover { border-color: #c8c1ff; }
+    .tone-button[aria-pressed="true"] { color: #fff; border-color: var(--accent); background: var(--accent); }
+    .tone-button svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
     .download-button { width: 100%; min-height: 46px; color: #fff; background: linear-gradient(110deg, #7162ed, #594bd7); box-shadow: 0 7px 15px rgba(102, 88, 232, .22); }
     .download-button:hover:not(:disabled) { background: linear-gradient(110deg, #6657e3, #4f42c8); box-shadow: 0 9px 18px rgba(102, 88, 232, .28); }
     .download-button:disabled { cursor: not-allowed; opacity: .48; box-shadow: none; }
@@ -259,6 +276,7 @@
       .control-card { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 22px; }
       .control-card h2, .control-card > .privacy-note, .control-card > .error-message { grid-column: 1 / -1; }
       .control-card h2 { margin-bottom: 13px; }
+      .position-tone-grid { grid-column: 1 / -1; }
       .control-section:nth-of-type(2) { border-top: 0; }
       .control-section:last-of-type { grid-column: 1 / -1; }
     }
@@ -349,19 +367,30 @@
           </div>
         </section>
 
-        <section class="control-section">
-          <div class="field-heading">
-            <span id="positionLabel" class="field-label">Vị trí Logo</span>
-            <span class="field-value">Kéo logo trên ảnh hoặc chọn góc</span>
-          </div>
-          <div class="position-grid" role="group" aria-label="Chọn vị trí logo">
-            <button class="position-button" type="button" data-position="top-left" aria-label="Góc trên bên trái" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="7" cy="7" r="2.5"/></svg></button>
-            <button class="position-button" type="button" data-position="top-right" aria-label="Góc trên bên phải" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="7" r="2.5"/></svg></button>
-            <button class="position-button" type="button" data-position="bottom-left" aria-label="Góc dưới bên trái" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="7" cy="17" r="2.5"/></svg></button>
-            <button class="position-button" type="button" data-position="bottom-right" aria-label="Góc dưới bên phải" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="17" r="2.5"/></svg></button>
-          </div>
-          <p class="hint">Bốn nút góc chỉ áp dụng cho Logo tiệm. Có thể kéo Phone trực tiếp trên ảnh.</p>
-        </section>
+        <div class="position-tone-grid">
+          <section class="control-section">
+            <div class="field-heading">
+              <span id="positionLabel" class="field-label">Vị trí Logo</span>
+            </div>
+            <div class="position-grid" role="group" aria-label="Chọn vị trí logo">
+              <button class="position-button" type="button" data-position="top-left" aria-label="Góc trên bên trái" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="7" cy="7" r="2.5"/></svg></button>
+              <button class="position-button" type="button" data-position="top-right" aria-label="Góc trên bên phải" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="7" r="2.5"/></svg></button>
+              <button class="position-button" type="button" data-position="bottom-left" aria-label="Góc dưới bên trái" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="7" cy="17" r="2.5"/></svg></button>
+              <button class="position-button" type="button" data-position="bottom-right" aria-label="Góc dưới bên phải" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="17" r="2.5"/></svg></button>
+            </div>
+          </section>
+          <section class="control-section">
+            <div class="field-heading">
+              <span class="field-label">Chọn tông màu</span>
+            </div>
+            <div class="tone-grid" role="group" aria-label="Chọn hiệu ứng màu ảnh">
+              <button class="tone-button" type="button" data-tone="fresh" aria-label="Màu tươi hơn" title="Màu tươi hơn" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 3v2m0 14v2M5.64 5.64l1.42 1.42m9.88 9.88 1.42 1.42M3 12h2m14 0h2M5.64 18.36l1.42-1.42m9.88-9.88 1.42-1.42"/><circle cx="12" cy="12" r="4"/></svg></button>
+              <button class="tone-button" type="button" data-tone="bright" aria-label="Màu sáng hơn" title="Màu sáng hơn" aria-pressed="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+              <button class="tone-button" type="button" data-tone="vivid" aria-label="Màu rực rỡ hơn" title="Màu rực rỡ hơn" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-9V3Z"/><path d="M16 3.5A9 9 0 0 1 20.5 8H16V3.5Z"/></svg></button>
+              <button class="tone-button" type="button" data-tone="sharp" aria-label="Màu nét hơn" title="Màu nét hơn" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="m12 3 2.25 6.75L21 12l-6.75 2.25L12 21l-2.25-6.75L3 12l6.75-2.25L12 3Z"/><path d="M19 2v4m-2-2h4"/></svg></button>
+            </div>
+          </section>
+        </div>
 
         <section class="control-section">
           <div class="phone-logo-group">
@@ -414,6 +443,8 @@
 
     let photo = null;
     let activeLayer = "logo";
+    let activeTone = null;
+    let sharpenedPhoto = null;
     let gesture = null;
     let resizeGesture = null;
     const logoLoadIds = { logo: 0, phone: 0 };
@@ -424,6 +455,62 @@
 
     function setError(message = "") {
       errorMessage.textContent = message;
+    }
+
+    function createSharpenedPhoto() {
+      const sharpenCanvas = document.createElement("canvas");
+      sharpenCanvas.width = photo.naturalWidth;
+      sharpenCanvas.height = photo.naturalHeight;
+      const sharpenContext = sharpenCanvas.getContext("2d", { willReadFrequently: true });
+      sharpenContext.drawImage(photo, 0, 0);
+      const imageData = sharpenContext.getImageData(0, 0, sharpenCanvas.width, sharpenCanvas.height);
+      const source = imageData.data;
+      const width = sharpenCanvas.width;
+      const height = sharpenCanvas.height;
+      const rowLength = width * 4;
+      let previousRow = source.slice(0, rowLength);
+      let currentRow = source.slice(rowLength, rowLength * 2);
+      let nextRow = source.slice(rowLength * 2, rowLength * 3);
+      for (let y = 1; y < height - 1; y++) {
+        const currentOffset = y * rowLength;
+        for (let x = 1; x < width - 1; x++) {
+          const rowIndex = x * 4;
+          const index = currentOffset + rowIndex;
+          for (let channel = 0; channel < 3; channel++) {
+            source[index + channel] = 5 * currentRow[rowIndex + channel]
+              - previousRow[rowIndex + channel]
+              - nextRow[rowIndex + channel]
+              - currentRow[rowIndex - 4 + channel]
+              - currentRow[rowIndex + 4 + channel];
+          }
+        }
+        if (y < height - 2) {
+          const firstRow = previousRow;
+          previousRow = currentRow;
+          currentRow = nextRow;
+          nextRow = firstRow;
+          nextRow.set(source.subarray((y + 2) * rowLength, (y + 3) * rowLength));
+        }
+      }
+      sharpenContext.putImageData(imageData, 0, 0);
+      return sharpenCanvas;
+    }
+
+    function drawPhoto(targetContext) {
+      if (activeTone === "sharp") {
+        sharpenedPhoto ??= createSharpenedPhoto();
+        targetContext.drawImage(sharpenedPhoto, 0, 0);
+        return;
+      }
+      const filters = {
+        fresh: "saturate(1.16) brightness(1.04)",
+        bright: "brightness(1.16)",
+        vivid: "saturate(1.45)"
+      };
+      targetContext.save();
+      targetContext.filter = filters[activeTone] || "none";
+      targetContext.drawImage(photo, 0, 0);
+      targetContext.restore();
     }
 
     function getLayerBounds(layer) {
@@ -441,7 +528,7 @@
 
     function drawComposition(targetContext) {
       targetContext.clearRect(0, 0, canvas.width, canvas.height);
-      targetContext.drawImage(photo, 0, 0);
+      drawPhoto(targetContext);
       for (const key of ["logo", "phone"]) {
         const layer = layers[key];
         const bounds = getLayerBounds(layer);
@@ -699,6 +786,7 @@
     imageInput.addEventListener("change", () => {
       loadImageFile(imageInput.files[0], (image) => {
         photo = image;
+        sharpenedPhoto = null;
         layers.logo.centerX = image.naturalWidth * 0.24;
         layers.logo.centerY = image.naturalHeight * 0.76;
         layers.phone.centerX = image.naturalWidth * 0.76;
@@ -763,6 +851,17 @@
       });
     });
 
+    document.querySelectorAll(".tone-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        activeTone = activeTone === button.dataset.tone ? null : button.dataset.tone;
+        if (activeTone !== "sharp") sharpenedPhoto = null;
+        document.querySelectorAll(".tone-button").forEach((item) => {
+          item.setAttribute("aria-pressed", String(item === button && activeTone !== null));
+        });
+        render();
+      });
+    });
+
     dropZone.addEventListener("dragover", (event) => {
       event.preventDefault();
       dropZone.style.outline = "2px solid #8b7dff";
@@ -774,6 +873,7 @@
       const file = event.dataTransfer.files[0];
       loadImageFile(file, (image) => {
         photo = image;
+        sharpenedPhoto = null;
         layers.logo.centerX = image.naturalWidth * 0.24;
         layers.logo.centerY = image.naturalHeight * 0.76;
         layers.phone.centerX = image.naturalWidth * 0.76;
