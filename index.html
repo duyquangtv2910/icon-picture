@@ -291,7 +291,7 @@
       .heading p { font-size: 13px; }
       .preview-card { padding: 12px; border-radius: 16px; }
       .canvas-wrap { height: clamp(500px, calc(100vh - 200px), 800px); }
-      #previewCanvas { max-height: calc(100% - 136px); }
+      #previewCanvas { max-height: calc(100% - 270px); }
       .control-card .tone-control-section { display: none; }
       .mobile-tone-toolbar:not([hidden]) {
         position: absolute;
@@ -299,8 +299,9 @@
         right: 50%;
         bottom: 8px;
         display: flex;
-        align-items: center;
-        gap: 8px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
         padding: 5px 8px;
         border: 1px solid rgba(229, 233, 241, .9);
         border-radius: 12px;
@@ -308,10 +309,14 @@
         box-shadow: 0 2px 8px rgba(30, 41, 68, .12);
         transform: translateX(50%);
       }
-      .mobile-tone-toolbar .field-label { flex: 0 0 auto; font-size: 10px; white-space: nowrap; }
+      .mobile-toolbar-section { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+      .mobile-tone-toolbar .field-label { font-size: 10px; line-height: 1.2; white-space: nowrap; }
       .mobile-tone-toolbar .tone-grid { grid-template-columns: repeat(4, 34px); gap: 5px; }
       .mobile-tone-toolbar .tone-button { width: 34px; height: 34px; border-radius: 7px; }
       .mobile-tone-toolbar .tone-button svg { width: 20px; height: 20px; }
+      .mobile-position-grid { display: grid; grid-template-columns: repeat(4, 30px); gap: 5px; }
+      .mobile-tone-toolbar .position-button { width: 30px; height: 30px; border-radius: 7px; }
+      .mobile-tone-toolbar .position-button svg { width: 19px; height: 19px; }
       .control-card { display: block; padding: 16px; border-radius: 16px; }
       .control-section:nth-of-type(2) { border-top: 1px solid var(--line); }
       .control-section:last-of-type { border-top: 1px solid var(--line); }
@@ -348,12 +353,23 @@
         <div id="dropZone" class="canvas-wrap">
           <canvas id="previewCanvas" aria-label="Ảnh xem trước sau khi gắn logo"></canvas>
           <div id="mobileToneToolbar" class="mobile-tone-toolbar" role="group" aria-label="Chọn tông màu cho ảnh" hidden>
-            <span class="field-label">Tông màu</span>
-            <div class="tone-grid">
-              <button class="tone-button" type="button" data-tone="fresh" aria-label="Màu tươi hơn" title="Màu tươi hơn" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 3v2m0 14v2M5.64 5.64l1.42 1.42m9.88 9.88 1.42 1.42M3 12h2m14 0h2M5.64 18.36l1.42-1.42m9.88-9.88 1.42-1.42"/><circle cx="12" cy="12" r="4"/></svg></button>
-              <button class="tone-button" type="button" data-tone="bright" aria-label="Màu sáng hơn" title="Màu sáng hơn" aria-pressed="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-              <button class="tone-button" type="button" data-tone="vivid" aria-label="Màu rực rỡ hơn" title="Màu rực rỡ hơn" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-9V3Z"/><path d="M16 3.5A9 9 0 0 1 20.5 8H16V3.5Z"/></svg></button>
-              <button class="tone-button" type="button" data-tone="sharp" aria-label="Màu nét hơn" title="Màu nét hơn" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="m12 3 2.25 6.75L21 12l-6.75 2.25L12 21l-2.25-6.75L3 12l6.75-2.25L12 3Z"/><path d="M19 2v4m-2-2h4"/></svg></button>
+            <div class="mobile-toolbar-section">
+              <span class="field-label">Tông màu</span>
+              <div class="tone-grid">
+                <button class="tone-button" type="button" data-tone="fresh" aria-label="Màu tươi hơn" title="Màu tươi hơn" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 3v2m0 14v2M5.64 5.64l1.42 1.42m9.88 9.88 1.42 1.42M3 12h2m14 0h2M5.64 18.36l1.42-1.42m9.88-9.88 1.42-1.42"/><circle cx="12" cy="12" r="4"/></svg></button>
+                <button class="tone-button" type="button" data-tone="bright" aria-label="Màu sáng hơn" title="Màu sáng hơn" aria-pressed="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+                <button class="tone-button" type="button" data-tone="vivid" aria-label="Màu rực rỡ hơn" title="Màu rực rỡ hơn" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-9V3Z"/><path d="M16 3.5A9 9 0 0 1 20.5 8H16V3.5Z"/></svg></button>
+                <button class="tone-button" type="button" data-tone="sharp" aria-label="Màu nét hơn" title="Màu nét hơn" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="m12 3 2.25 6.75L21 12l-6.75 2.25L12 21l-2.25-6.75L3 12l6.75-2.25L12 3Z"/><path d="M19 2v4m-2-2h4"/></svg></button>
+              </div>
+            </div>
+            <div class="mobile-toolbar-section">
+              <span class="field-label">Đưa logo vô các góc</span>
+              <div class="mobile-position-grid" role="group" aria-label="Đưa logo vô các góc">
+                <button class="position-button" type="button" data-position="top-left" aria-label="Logo góc trên bên trái" title="Góc trên bên trái" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="7" cy="7" r="2.5"/></svg></button>
+                <button class="position-button" type="button" data-position="top-right" aria-label="Logo góc trên bên phải" title="Góc trên bên phải" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="7" r="2.5"/></svg></button>
+                <button class="position-button" type="button" data-position="bottom-left" aria-label="Logo góc dưới bên trái" title="Góc dưới bên trái" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="7" cy="17" r="2.5"/></svg></button>
+                <button class="position-button" type="button" data-position="bottom-right" aria-label="Logo góc dưới bên phải" title="Góc dưới bên phải" aria-pressed="false"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="17" r="2.5"/></svg></button>
+              </div>
             </div>
           </div>
           <button id="resizeHandle" class="resize-handle" type="button" aria-label="Kéo để thay đổi kích thước logo" hidden>
@@ -879,7 +895,9 @@
         const isTop = button.dataset.position.startsWith("top");
         layer.centerX = isLeft ? margin + bounds.width / 2 : canvas.width - margin - bounds.width / 2;
         layer.centerY = isTop ? margin + bounds.height / 2 : canvas.height - margin - bounds.height / 2;
-        document.querySelectorAll(".position-button").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+        document.querySelectorAll(".position-button").forEach((item) => {
+          item.setAttribute("aria-pressed", String(item.dataset.position === button.dataset.position));
+        });
         render();
       });
     });
