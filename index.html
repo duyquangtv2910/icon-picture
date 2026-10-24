@@ -36,7 +36,7 @@
     button { cursor: pointer; }
 
     .topbar {
-      height: 74px;
+      height: 84px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -49,8 +49,8 @@
     .brand { display: flex; align-items: center; gap: 11px; color: #efa7c8; font-size: 14px; font-weight: 760; letter-spacing: -.035em; }
     .brand-mark {
       display: block;
-      width: 36px;
-      height: 36px;
+      width: 72px;
+      height: 72px;
       border-radius: 8px;
       object-fit: contain;
     }
@@ -280,8 +280,8 @@
       .control-section:last-of-type { grid-column: 1 / -1; }
     }
     @media (max-width: 560px) {
-      .topbar { height: 64px; padding: 0 18px; }
-      .top-note { font-size: 11px; }
+      .topbar { height: 84px; padding: 0 18px; }
+      .top-note { display: none; }
       main { width: min(100% - 24px, 480px); padding-top: 32px; }
       .heading { margin-bottom: 22px; }
       h1 { font-size: clamp(40px, 8.5vw, 52px); }
