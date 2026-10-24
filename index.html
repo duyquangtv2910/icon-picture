@@ -692,8 +692,12 @@
       noteCanvas.height = Math.ceil(ascent + descent + padding * 2);
       const noteContext = noteCanvas.getContext("2d");
       noteContext.font = font();
+      noteContext.lineJoin = "round";
+      noteContext.lineWidth = Math.max(1, fontSize * 0.025);
+      noteContext.strokeStyle = "#fff";
       noteContext.fillStyle = headingStyle.color;
       noteContext.textBaseline = "alphabetic";
+      noteContext.strokeText(text, padding, padding + ascent);
       noteContext.fillText(text, padding, padding + ascent);
       return noteCanvas;
     }
