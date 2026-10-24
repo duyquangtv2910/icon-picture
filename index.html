@@ -699,7 +699,7 @@
       noteContext.textBaseline = "alphabetic";
       noteContext.strokeText(text, padding, padding + ascent);
       noteContext.fillText(text, padding, padding + ascent);
-      const rotation = -Math.PI / 6;
+      const rotation = -Math.PI / 9;
       const rotatedWidth = Math.ceil(noteCanvas.width * Math.cos(Math.abs(rotation)) + noteCanvas.height * Math.sin(Math.abs(rotation)));
       const rotatedHeight = Math.ceil(noteCanvas.width * Math.sin(Math.abs(rotation)) + noteCanvas.height * Math.cos(Math.abs(rotation)));
       const rotatedCanvas = document.createElement("canvas");
