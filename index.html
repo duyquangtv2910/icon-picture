@@ -937,7 +937,7 @@
           const isSmallLogo = layerKey === "logo" && ["Logo 1", "Logo 2", "Logo 3"].includes(button.dataset.name);
           layers[layerKey].widthRatio = layerKey === "logo"
             ? (isPhoneLayout ? (isSmallLogo ? 0.44 : 0.22) : 0.18)
-            : (isPhoneLayout ? 0.27 : 0.22);
+            : (isPhoneLayout ? 0.54 : 0.22);
           button.parentElement.querySelectorAll(".logo-option").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
           document.getElementById("logoStatus").textContent = button.dataset.logoLabel || button.querySelector("span").textContent;
           updateClearButton(layerKey);
