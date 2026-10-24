@@ -672,7 +672,7 @@
     function createNoteImage(text) {
       const heading = document.getElementById("page-title");
       const headingStyle = getComputedStyle(heading);
-      let fontSize = Math.min(photo.naturalWidth * 0.09, photo.naturalHeight * 0.08);
+      let fontSize = Math.min(photo.naturalWidth * 0.18, photo.naturalHeight * 0.16);
       const measurementCanvas = document.createElement("canvas");
       const measurementContext = measurementCanvas.getContext("2d");
       const font = () => `${headingStyle.fontWeight} ${fontSize}px ${headingStyle.fontFamily}`;
