@@ -699,7 +699,17 @@
       noteContext.textBaseline = "alphabetic";
       noteContext.strokeText(text, padding, padding + ascent);
       noteContext.fillText(text, padding, padding + ascent);
-      return noteCanvas;
+      const rotation = -Math.PI / 6;
+      const rotatedWidth = Math.ceil(noteCanvas.width * Math.cos(Math.abs(rotation)) + noteCanvas.height * Math.sin(Math.abs(rotation)));
+      const rotatedHeight = Math.ceil(noteCanvas.width * Math.sin(Math.abs(rotation)) + noteCanvas.height * Math.cos(Math.abs(rotation)));
+      const rotatedCanvas = document.createElement("canvas");
+      rotatedCanvas.width = rotatedWidth;
+      rotatedCanvas.height = rotatedHeight;
+      const rotatedContext = rotatedCanvas.getContext("2d");
+      rotatedContext.translate(rotatedWidth / 2, rotatedHeight / 2);
+      rotatedContext.rotate(rotation);
+      rotatedContext.drawImage(noteCanvas, -noteCanvas.width / 2, -noteCanvas.height / 2);
+      return rotatedCanvas;
     }
 
     function updateNoteLayer() {
