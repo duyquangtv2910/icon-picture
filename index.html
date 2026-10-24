@@ -502,7 +502,8 @@
     let photo = null;
     let activeLayer = "logo";
     let activeTone = null;
-    let sharpenedPhoto = null;
+    let processedPhoto = null;
+    let processedTone = null;
     let gesture = null;
     let resizeGesture = null;
     const logoLoadIds = { logo: 0, phone: 0 };
@@ -554,24 +555,82 @@
       return sharpenCanvas;
     }
 
+    function applyTonePixels(imageCanvas, tone) {
+      const imageContext = imageCanvas.getContext("2d", { willReadFrequently: true });
+      const imageData = imageContext.getImageData(0, 0, imageCanvas.width, imageCanvas.height);
+      const pixels = imageData.data;
+      const clamp = (value) => Math.max(0, Math.min(255, value));
+      const adjustContrast = (value, amount) => (value - 127.5) * amount + 127.5;
+      const adjustSaturation = (red, green, blue, amount) => {
+        const luminance = red * 0.213 + green * 0.715 + blue * 0.072;
+        return [
+          luminance + (red - luminance) * amount,
+          luminance + (green - luminance) * amount,
+          luminance + (blue - luminance) * amount
+        ];
+      };
+
+      for (let index = 0; index < pixels.length; index += 4) {
+        let red = pixels[index];
+        let green = pixels[index + 1];
+        let blue = pixels[index + 2];
+
+        if (tone === "fresh") {
+          const sepiaRed = red * 0.393 + green * 0.769 + blue * 0.189;
+          const sepiaGreen = red * 0.349 + green * 0.686 + blue * 0.168;
+          const sepiaBlue = red * 0.272 + green * 0.534 + blue * 0.131;
+          red += (sepiaRed - red) * 0.24;
+          green += (sepiaGreen - green) * 0.24;
+          blue += (sepiaBlue - blue) * 0.24;
+          [red, green, blue] = adjustSaturation(red, green, blue, 1.3);
+          red *= 1.04;
+          green *= 1.04;
+          blue *= 1.04;
+        } else if (tone === "bright") {
+          red = adjustContrast(red * 1.2, 1.04);
+          green = adjustContrast(green * 1.2, 1.04);
+          blue = adjustContrast(blue * 1.2, 1.04);
+        } else if (tone === "vivid") {
+          [red, green, blue] = adjustSaturation(red, green, blue, 1.7);
+          red = adjustContrast(red, 1.12);
+          green = adjustContrast(green, 1.12);
+          blue = adjustContrast(blue, 1.12);
+        } else if (tone === "sharp") {
+          [red, green, blue] = adjustSaturation(red, green, blue, 1.08);
+          red = adjustContrast(red, 1.12);
+          green = adjustContrast(green, 1.12);
+          blue = adjustContrast(blue, 1.12);
+        }
+
+        pixels[index] = clamp(red);
+        pixels[index + 1] = clamp(green);
+        pixels[index + 2] = clamp(blue);
+      }
+
+      imageContext.putImageData(imageData, 0, 0);
+      return imageCanvas;
+    }
+
+    function createTonePhoto(tone) {
+      const toneCanvas = tone === "sharp" ? createSharpenedPhoto() : document.createElement("canvas");
+      if (tone !== "sharp") {
+        toneCanvas.width = photo.naturalWidth;
+        toneCanvas.height = photo.naturalHeight;
+        toneCanvas.getContext("2d").drawImage(photo, 0, 0);
+      }
+      return applyTonePixels(toneCanvas, tone);
+    }
+
     function drawPhoto(targetContext) {
-      if (activeTone === "sharp") {
-        sharpenedPhoto ??= createSharpenedPhoto();
-        targetContext.save();
-        targetContext.filter = "contrast(1.12) saturate(1.08)";
-        targetContext.drawImage(sharpenedPhoto, 0, 0);
-        targetContext.restore();
+      if (!activeTone) {
+        targetContext.drawImage(photo, 0, 0);
         return;
       }
-      const filters = {
-        fresh: "sepia(0.24) saturate(1.3) brightness(1.04)",
-        bright: "brightness(1.2) contrast(1.04)",
-        vivid: "saturate(1.7) contrast(1.12)"
-      };
-      targetContext.save();
-      targetContext.filter = filters[activeTone] || "none";
-      targetContext.drawImage(photo, 0, 0);
-      targetContext.restore();
+      if (processedTone !== activeTone) {
+        processedPhoto = createTonePhoto(activeTone);
+        processedTone = activeTone;
+      }
+      targetContext.drawImage(processedPhoto, 0, 0);
     }
 
     function getLayerBounds(layer) {
@@ -848,7 +907,8 @@
     imageInput.addEventListener("change", () => {
       loadImageFile(imageInput.files[0], (image) => {
         photo = image;
-        sharpenedPhoto = null;
+        processedPhoto = null;
+        processedTone = null;
         layers.logo.centerX = image.naturalWidth * 0.24;
         layers.logo.centerY = image.naturalHeight * 0.76;
         layers.phone.centerX = image.naturalWidth * 0.76;
@@ -918,7 +978,8 @@
     document.querySelectorAll(".tone-button").forEach((button) => {
       button.addEventListener("click", () => {
         activeTone = activeTone === button.dataset.tone ? null : button.dataset.tone;
-        if (activeTone !== "sharp") sharpenedPhoto = null;
+        processedPhoto = null;
+        processedTone = null;
         document.querySelectorAll(".tone-button").forEach((item) => {
           item.setAttribute("aria-pressed", String(item.dataset.tone === activeTone));
         });
@@ -937,7 +998,8 @@
       const file = event.dataTransfer.files[0];
       loadImageFile(file, (image) => {
         photo = image;
-        sharpenedPhoto = null;
+        processedPhoto = null;
+        processedTone = null;
         layers.logo.centerX = image.naturalWidth * 0.24;
         layers.logo.centerY = image.naturalHeight * 0.76;
         layers.phone.centerX = image.naturalWidth * 0.76;
