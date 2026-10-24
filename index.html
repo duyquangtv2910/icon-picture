@@ -191,14 +191,17 @@
     .phone-logo-title span { margin-left: 5px; color: var(--muted); font-size: 10px; font-weight: 450; }
     .note-control-section .field-heading { gap: 10px; }
     .note-input {
+      display: block;
       width: 100%;
-      min-height: 40px;
+      min-height: 72px;
       padding: 9px 11px;
       color: var(--ink);
       border: 1px solid var(--line);
       border-radius: 9px;
       background: #fff;
       font-size: 13px;
+      line-height: 1.45;
+      resize: vertical;
     }
     .note-input:focus { border-color: var(--accent); outline: 2px solid rgba(102, 88, 232, .14); }
     .logo-option {
@@ -476,7 +479,7 @@
             </div>
           </div>
           <label class="visually-hidden" for="noteInput">Dòng chữ muốn thêm vào hình</label>
-          <input id="noteInput" class="note-input" type="text" maxlength="80" placeholder="Nhập dòng chữ muốn thêm vào hình">
+          <textarea id="noteInput" class="note-input" maxlength="80" rows="3" placeholder="Nhập dòng chữ muốn thêm vào hình"></textarea>
         </section>
 
         <section class="control-section">
@@ -672,24 +675,27 @@
     function createNoteImage(text) {
       const heading = document.getElementById("page-title");
       const headingStyle = getComputedStyle(heading);
+      const lines = text.split(/\r?\n/);
       let fontSize = Math.min(photo.naturalWidth * 0.18, photo.naturalHeight * 0.16);
       const measurementCanvas = document.createElement("canvas");
       const measurementContext = measurementCanvas.getContext("2d");
       const font = () => `${headingStyle.fontWeight} ${fontSize}px ${headingStyle.fontFamily}`;
       measurementContext.font = font();
       const maxTextWidth = photo.naturalWidth * 0.76;
-      const measuredText = measurementContext.measureText(text);
-      if (measuredText.width > maxTextWidth) {
-        fontSize *= maxTextWidth / measuredText.width;
+      const maxLineWidth = Math.max(...lines.map((line) => measurementContext.measureText(line).width));
+      if (maxLineWidth > maxTextWidth) {
+        fontSize *= maxTextWidth / maxLineWidth;
       }
       measurementContext.font = font();
-      const metrics = measurementContext.measureText(text);
-      const ascent = metrics.actualBoundingBoxAscent || fontSize * 0.8;
-      const descent = metrics.actualBoundingBoxDescent || fontSize * 0.2;
+      const lineMetrics = lines.map((line) => measurementContext.measureText(line));
+      const textWidth = Math.max(...lineMetrics.map((metrics) => metrics.width));
+      const ascent = Math.max(...lineMetrics.map((metrics) => metrics.actualBoundingBoxAscent || fontSize * 0.8));
+      const descent = Math.max(...lineMetrics.map((metrics) => metrics.actualBoundingBoxDescent || fontSize * 0.2));
+      const lineHeight = fontSize * 1.2;
       const padding = fontSize * 0.12;
       const noteCanvas = document.createElement("canvas");
-      noteCanvas.width = Math.ceil(metrics.width + padding * 2);
-      noteCanvas.height = Math.ceil(ascent + descent + padding * 2);
+      noteCanvas.width = Math.ceil(textWidth + padding * 2);
+      noteCanvas.height = Math.ceil(ascent + descent + lineHeight * (lines.length - 1) + padding * 2);
       const noteContext = noteCanvas.getContext("2d");
       noteContext.font = font();
       noteContext.lineJoin = "round";
@@ -697,8 +703,11 @@
       noteContext.strokeStyle = "#fff";
       noteContext.fillStyle = headingStyle.color;
       noteContext.textBaseline = "alphabetic";
-      noteContext.strokeText(text, padding, padding + ascent);
-      noteContext.fillText(text, padding, padding + ascent);
+      lines.forEach((line, index) => {
+        const baseline = padding + ascent + lineHeight * index;
+        noteContext.strokeText(line, padding, baseline);
+        noteContext.fillText(line, padding, baseline);
+      });
       const rotation = -Math.PI / 12;
       const rotatedWidth = Math.ceil(noteCanvas.width * Math.cos(Math.abs(rotation)) + noteCanvas.height * Math.sin(Math.abs(rotation)));
       const rotatedHeight = Math.ceil(noteCanvas.width * Math.sin(Math.abs(rotation)) + noteCanvas.height * Math.cos(Math.abs(rotation)));
