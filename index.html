@@ -1265,3 +1265,175 @@
       if (!file.type.startsWith("image/")) {
         setError("Vui lòng chọn một tệp hình ảnh.");
         return;
+      }
+      const url = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = () => {
+        URL.revokeObjectURL(url);
+        setError("");
+        onLoad(image, file);
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(url);
+        setError("Không thể mở tệp này. Hãy thử chọn một ảnh khác.");
+      };
+      image.src = url;
+    }
+
+    imageInput.addEventListener("change", () => {
+      loadImageFile(imageInput.files[0], (image) => {
+        photo = image;
+        processedPhoto = null;
+        processedTone = null;
+        layers.logo.centerX = image.naturalWidth * 0.24;
+        layers.logo.centerY = image.naturalHeight * 0.76;
+        layers.phone.centerX = image.naturalWidth * 0.76;
+        layers.phone.centerY = image.naturalHeight * 0.76;
+        layers.extraIcon.centerX = image.naturalWidth / 2;
+        layers.extraIcon.centerY = image.naturalHeight / 2;
+        layers.note.centerX = image.naturalWidth / 2;
+        layers.note.centerY = image.naturalHeight / 2;
+        if (noteInput.value.trim()) updateNoteLayer();
+        setLocalizedText(document.getElementById("previewStatus"), "Đã sẵn sàng");
+        document.getElementById("imageDimensions").textContent = `${image.naturalWidth} × ${image.naturalHeight} px`;
+        changeImageButton.hidden = false;
+        render();
+      });
+    });
+
+    document.querySelectorAll(".logo-option").forEach((button) => {
+      button.addEventListener("click", () => {
+        activeLayer = button.closest(".logo-gallery").dataset.layerKey;
+        const layerKey = activeLayer;
+        document.querySelectorAll(".position-button").forEach((item) => item.setAttribute("aria-pressed", "false"));
+        const loadId = ++logoLoadIds[layerKey];
+        const image = new Image();
+        image.onload = () => {
+          if (loadId !== logoLoadIds[layerKey]) return;
+          layers[layerKey].image = image;
+          const isPhoneLayout = window.matchMedia("(max-width: 560px)").matches;
+          const isSmallLogo = layerKey === "logo" && ["Logo 1", "Logo 2", "Logo 3"].includes(button.dataset.name);
+          layers[layerKey].widthRatio = layerKey === "logo"
+            ? (isPhoneLayout ? (isSmallLogo ? 0.44 : 0.22) : 0.18)
+            : (isPhoneLayout ? 0.54 : 0.22);
+          button.parentElement.querySelectorAll(".logo-option").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+          const statusId = layerKey === "extraIcon" ? "extraIconStatus" : "logoStatus";
+          setLocalizedText(document.getElementById(statusId), button.dataset.logoLabel || button.querySelector("span").textContent);
+          updateClearButton(layerKey);
+          setError("");
+          render();
+        };
+        image.onerror = () => {
+          if (loadId !== logoLoadIds[layerKey]) return;
+          setError(`Không tải được ${button.dataset.src}. Hãy tải thư mục logos lên repository cùng với index.html.`);
+        };
+        image.src = layerKey === "extraIcon" ? button.querySelector("img").src : button.dataset.src;
+      });
+    });
+
+    document.getElementById("emptyChooseButton").addEventListener("click", () => imageInput.click());
+    changeImageButton.addEventListener("click", () => imageInput.click());
+    document.getElementById("clearLogoButton").addEventListener("click", () => clearLayer("logo"));
+    document.getElementById("clearPhoneButton").addEventListener("click", () => clearLayer("phone"));
+    document.getElementById("clearExtraIconButton").addEventListener("click", () => clearLayer("extraIcon"));
+    document.getElementById("clearNoteButton").addEventListener("click", () => clearLayer("note"));
+    noteInput.addEventListener("input", updateNoteLayer);
+    document.querySelector('.logo-option[aria-pressed="true"]').click();
+    applyLanguage();
+    opacityInput.addEventListener("input", () => {
+      document.getElementById("opacityValue").textContent = `${opacityInput.value}%`;
+      render();
+    });
+
+    document.querySelectorAll(".position-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        const layer = layers.logo;
+        const bounds = getLayerBounds(layer);
+        if (!photo || !bounds) return;
+        activeLayer = "logo";
+        const margin = Math.max(8, Math.round(Math.min(canvas.width, canvas.height) * 0.025));
+        const isLeft = button.dataset.position.endsWith("left");
+        const isTop = button.dataset.position.startsWith("top");
+        layer.centerX = isLeft ? margin + bounds.width / 2 : canvas.width - margin - bounds.width / 2;
+        layer.centerY = isTop ? margin + bounds.height / 2 : canvas.height - margin - bounds.height / 2;
+        document.querySelectorAll(".position-button").forEach((item) => {
+          item.setAttribute("aria-pressed", String(item.dataset.position === button.dataset.position));
+        });
+        render();
+      });
+    });
+
+    document.querySelectorAll(".tone-button").forEach((button) => {
+      button.addEventListener("click", () => {
+        activeTone = activeTone === button.dataset.tone ? null : button.dataset.tone;
+        processedPhoto = null;
+        processedTone = null;
+        document.querySelectorAll(".tone-button").forEach((item) => {
+          item.setAttribute("aria-pressed", String(item.dataset.tone === activeTone));
+        });
+        render();
+      });
+    });
+
+    dropZone.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      dropZone.style.outline = "2px solid #8b7dff";
+    });
+    dropZone.addEventListener("dragleave", () => { dropZone.style.outline = ""; });
+    dropZone.addEventListener("drop", (event) => {
+      event.preventDefault();
+      dropZone.style.outline = "";
+      const file = event.dataTransfer.files[0];
+      loadImageFile(file, (image) => {
+        photo = image;
+        processedPhoto = null;
+        processedTone = null;
+        layers.logo.centerX = image.naturalWidth * 0.24;
+        layers.logo.centerY = image.naturalHeight * 0.76;
+        layers.phone.centerX = image.naturalWidth * 0.76;
+        layers.phone.centerY = image.naturalHeight * 0.76;
+        layers.extraIcon.centerX = image.naturalWidth / 2;
+        layers.extraIcon.centerY = image.naturalHeight / 2;
+        layers.note.centerX = image.naturalWidth / 2;
+        layers.note.centerY = image.naturalHeight / 2;
+        if (noteInput.value.trim()) updateNoteLayer();
+        setLocalizedText(document.getElementById("previewStatus"), "Đã sẵn sàng");
+        document.getElementById("imageDimensions").textContent = `${image.naturalWidth} × ${image.naturalHeight} px`;
+        changeImageButton.hidden = false;
+        render();
+      });
+    });
+
+    downloadButton.addEventListener("click", () => {
+      if (!photo) return;
+      const outputCanvas = document.createElement("canvas");
+      outputCanvas.width = photo.naturalWidth;
+      outputCanvas.height = photo.naturalHeight;
+      drawComposition(outputCanvas.getContext("2d"));
+      outputCanvas.toBlob((blob) => {
+        if (!blob) {
+          setError("Không thể tạo ảnh tải xuống. Hãy thử lại với ảnh khác.");
+          return;
+        }
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "anh-da-gan-logo.png";
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+        setError("");
+      }, "image/png");
+    });
+
+    window.addEventListener("resize", updateResizeHandle);
+    window.addEventListener("scroll", updateBackToTopButton, { passive: true });
+    window.addEventListener("resize", updateBackToTopButton);
+    backToTopButton.addEventListener("click", () => {
+      backToTopButton.hidden = true;
+      previewSection.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+      });
+    });
+    updateBackToTopButton();
+  </script>
+</body>
+</html>
